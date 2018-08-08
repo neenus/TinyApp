@@ -15,13 +15,13 @@
         <form method="POST" action="/urls/<%= item %>/delete">
           <a href="<%= urls[item] %>"> <%= item %> </a>:
           <a href="<%= urls[item] %>"> <%= urls[item] %></a>
-          <input type="submit" value="delete">
-          <button type="button" onclick="location.href='/urls/<%=item%>'" >edit</button>
+          <input type="submit" value="Delete">
+          <button type="button" onclick="location.href='/urls/<%=item%>'" >Edit</button>
         </form>
       </li>
       <% }; %>
   </ul>
-  <a href="urls/new">shorten URL</a>
+  <a href="/urls/new">shorten URL</a>
 </body>
 
 </html>

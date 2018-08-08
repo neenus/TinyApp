@@ -87,3 +87,10 @@ app.post("/urls", (req, res) => {
     res.redirect("/urls");
 
 });
+
+// this will update the value entered in text box
+app.post("/urls/shortURL", (req, res) => {
+    urlDatabase[req.body.shortURL] = req.body.longURL;
+    // res.send("ok");
+    res.redirect("/urls");
+});
