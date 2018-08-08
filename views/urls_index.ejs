@@ -1,15 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <title>TinyApp</title>
 </head>
+
 <body>
-<header> <% include partials/_header %></header>
-    <ul>
+  <header>
+    <% include partials/_header %>
+  </header>
+  <ul>
     <% for (var item in urls) { %>
-      <li><%= item %>: <%= urls[item] %></li>
-    <% }; %>
-    </ul>
-    <a href="#">shorten URL</a>
+      <li>
+        <form method="POST" action="/urls/<%= item %>/delete">
+            <a href="<%= urls[item] %>"> <%= item %> </a>:
+            <a href="<%= urls[item] %>"> <%= urls[item] %></a>
+          <input type="submit" value="delete">
+        </form>
+      </li>
+      <% }; %>
+  </ul>
+  <a href="urls/new">shorten URL</a>
 </body>
+
 </html>
