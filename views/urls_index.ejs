@@ -13,9 +13,10 @@
     <% for (var item in urls) { %>
       <li>
         <form method="POST" action="/urls/<%= item %>/delete">
-            <a href="<%= urls[item] %>"> <%= item %> </a>:
-            <a href="<%= urls[item] %>"> <%= urls[item] %></a>
+          <a href="<%= urls[item] %>"> <%= item %> </a>:
+          <a href="<%= urls[item] %>"> <%= urls[item] %></a>
           <input type="submit" value="delete">
+          <button type="button" onclick="location.href='/urls/<%=item%>'" >edit</button>
         </form>
       </li>
       <% }; %>
