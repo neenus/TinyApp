@@ -1,93 +1,94 @@
+// dependencies
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const app = express();
-app.use(cookieParser());
-var PORT = 8080; // default port 8080
+const bodyParser = require("body-parser");
 
-app.set('view engine', 'ejs');
-
-// function to generate a six charecter random string 
-// this code snippet was copied from stackoverflow 
-function generateRandomString() {
-    var text = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    for (var i = 0; i < 6; i++)
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    return text;
-}
-// console.log(generateRandomString());
+// Global const for the app
+const PORT = process.env.PORT || 8080; // default port 8080
 
 
-var urlDatabase = {
+// Databse 
+const urlDatabase = {
     "b2xVn2": "http://lighthouselabs.ca",
     "9sm5xK": "http://www.google.com"
 };
 
+// Setup express app
+const app = express();
 
-// routes 
-// =========================================
+// Setup middleware
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+
+// view enginge
+app.set('view engine', 'ejs');
+
+// function to generate a six charecter random string 
+// disclosure: this code snippet was copied from stackoverflow 
+function generateRandomString() {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    
+    for (var i = 0; i < 6; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+    return text;
+}
+
+// App routes 
+// Get - home route
 app.get("/urls", (req, res) => {
     let templateVars = {
+        username: req.cookies.username,
         urls: urlDatabase
     };
     res.render("urls_index", templateVars);
 });
 
+// Get - new URL route - /url_new
 app.get("/urls/new", (req, res) => {
-    res.render("urls_new");
+    let templateVars = {
+        username: req.cookies.username,
+        urls: urlDatabase
+    };
+    res.render("urls_new", templateVars);
     // res.redirect("/urls");
 });
 
+// Get - Show individual URL route - /url_show
 app.get("/urls/:id", (req, res) => {
     let templateVars = {
+        username: req.cookies.username,
         shortURL: req.params.id,
-        longURL: urlDatabase[req.params.id]  
+        longURL: urlDatabase[req.params.id]
     };
-    // console.log(shortURL);
     res.render("urls_show", templateVars);
 });
 
+// Post - delete url route
 app.post("/urls/:id/delete", (req, res) => {
+    let templateVars = {
+        username: req.cookies.username,
+        urls: urlDatabase
+    };
     console.log(urlDatabase[req.params.id]);
     delete urlDatabase[req.params.id];
     res.redirect("/urls");
 });
-// ===========================================
 
 
-app.get('/', (req, res) => {
-    res.end('Hello!');
-});
-
-app.listen(PORT, () => {
-    console.log(`Example app listening on port ${PORT}!`);
-
-});
-
+// Get - not sure why this is here
 app.get("/urls.json", (req, res) => {
     res.json(urlDatabase);
 });
 
-app.get("/hello", (req, res) => {
-    res.end("<html><body>Hello <b>World</b></body></html>\n");
-});
-
-const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
-
+// Post - Home route to add new url - '/urls/ 
 app.post("/urls", (req, res) => {
     // console.log(req.body); // debug statement to see POST parameters
-        let newid =  generateRandomString();
-        urlDatabase[newid] = req.body.longURL;
-    // };
-    // req.body.shortURL
-    // req.body.longURL
-    // res.send("Ok"); // Respond with 'Ok' (we will replace this)
+    let newid = generateRandomString();
+    urlDatabase[newid] = req.body.longURL;
     res.redirect("/urls");
-
 });
 
 // this will update the value entered in text box
@@ -102,4 +103,7 @@ app.post("/urls/login", (req, res) => {
     // console.log(req);
     res.cookie("username", req.body.username);
     res.redirect(req.headers.referer); // stay on same page
+});
+app.listen(PORT, () => {
+    console.log(`Example app listening on port ${PORT}!`);
 });
