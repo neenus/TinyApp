@@ -98,12 +98,21 @@ app.post("/urls/shortURL", (req, res) => {
     res.redirect("/urls");
 });
 
-// Login route ===> user username coockie
+// Login route ===> user username cookie
 app.post("/urls/login", (req, res) => {
     // console.log(req);
     res.cookie("username", req.body.username);
     res.redirect(req.headers.referer); // stay on same page
 });
+
+// Logout route ===> clear username cookie
+app.post("/urls/logout", (req, res) => {
+    // console.log(req);
+    res.clearCookie("username");
+    res.redirect(req.headers.referer); // stay on same page
+});
+
+// App listener
 app.listen(PORT, () => {
     console.log(`Example app listening on port ${PORT}!`);
 });
