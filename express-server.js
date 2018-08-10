@@ -18,12 +18,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    password: "asdf"
   },
  "userRandomID2": {
     id: "userRandomID2", 
-    email: "email@email.copm", 
-    password: "dishwasher-funk"
+    email: "email@email.com", 
+    password: "asdf"
   }
 };
 
@@ -72,7 +72,7 @@ function getUser(enteredEmail) {
 // Get - home route
 app.get("/urls", (req, res) => {
   let templateVars = {
-    user_id: req.cookies.id,
+    user_id: req.cookies.user_id,
     urls: urlDatabase
   };
   res.render("urls_index", templateVars);
@@ -99,7 +99,7 @@ app.get("/urls/register", (req, res) => {
 });
 
 // Get - Login route - /urls_login
-app.get("/urls/login", (req, res) => {
+app.get("/login", (req, res) => {
   let templateVars = {
     user_id: req.cookies.id,
     shortURL: req.params.id,
@@ -152,7 +152,7 @@ app.post("/urls/shortURL", (req, res) => {
 });
 
 // Post - Login route ===> user username cookie
-app.post("/urls/login", (req, res) => {
+app.post("/login", (req, res) => {
   const {email, password} = req.body;
   let thisuser = getUser(email);
   // console.log(passwordCheck);
@@ -170,10 +170,9 @@ app.post("/urls/login", (req, res) => {
 });
 
 // Post - Logout route ===> clear username cookie
-app.post("/urls/logout", (req, res) => {
-  // console.log(req);
+app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect(req.headers.referer); // stay on same page
+  res.redirect("/urls");
 });
 
 // Post - registration route
@@ -193,6 +192,7 @@ app.post("/urls/register", (req, res) => {
       email: email,
       password: password
     };
+    res.cookie("user_id", id);
     res.redirect("/urls");
   }
 });

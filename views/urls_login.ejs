@@ -11,7 +11,7 @@
   </header>
   <h3>Login Page</h3>
   <% if (!user_id) { %>
-    <form method="POST" action="/urls/login" style="margin:50px">
+    <form method="POST" action="/login" style="margin:50px">
       <div>
         <label for="email">Enter E-mail: </label>
         <input type="text" name="email" placeholder="ie: john@domain.com" onfocus="this.placeholder=''" onblur="this.placeholder='ie: john@domail.com'"
@@ -34,7 +34,7 @@
       <h3>Hello
         <%= user_id %>!
       </h3>
-      <form method="POST" action="/urls/logout">
+      <form method="POST" action="/logout">
         <input type="submit" value="Logout">
       </form>
       <% } %>

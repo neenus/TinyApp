@@ -1,6 +1,8 @@
 <h1>
   <a href="/urls">Header of TinyApp</a>
 </h1>
+
+<% if (!user_id) { %>
 <!-- register button -->
 <button 
   name="register" 
@@ -13,6 +15,21 @@
 <button 
   name="Login" 
   value="Login" 
-  onclick="location.href='/urls/login'"
+  onclick="location.href='/login'"
 > Login 
 </button>
+
+<% } else  { %>
+  <!-- Logout button -->
+  <form method="POST" action="/logout">
+  <input type="submit" value="Logout">
+</form>
+  <% } %>
+  
+  <!-- 
+  <!-- <button 
+  name="Logout" 
+  value="Logout" 
+  onclick="location.href='/logout'"
+> Logout 
+</button> -->
