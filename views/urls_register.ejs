@@ -8,14 +8,21 @@
 <body>
   <header>
     <% include partials/_header %>
+  </header>
+  <h3>Register Page</h3>
       <form method="POST" action="/urls/register" style="margin:50px">
-        <div> </div><label for="email">E-mail: </label> </div> 
-        <div><input width="100%" type="email" name="email" autocomplete="off"   id="email"></div>
-        <!-- <br> -->
-        <div><label for="password">Password: </label></div>
-        <div><input type="password" name="password"  id="password"></div>
+        <div>
+            <label for="user">Enter e-mail: </label>
+            <input type="email" name="email" placeholder="ie: john@domain.com" onfocus="this.placeholder=''" onblur="this.placeholder='ie: john@domain.com'"
+              autocomplete="off" >
+        </div>
         <br>
         <div>
+            <label for="email">Enter password: </label>
+            <input type="password" name="password" autocomplete="off" >
+        <br>
+        <div>
+        <br>
           <input type="submit" name="Submit">
         </div>
       </form>

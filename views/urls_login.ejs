@@ -1,17 +1,43 @@
-<% if (!username) { %>
-  <form method="POST" action="/urls/login">
-    <label for="username">Enter username: </label>
-    <input type="text" name="username" placeholder="John Doe" onfocus="this.placeholder=''" onblur="this.placeholder='John Doe'"
-      autocomplete="off" required>
-    <input type="submit" value="Login">
-  </form>
+<!DOCTYPE html>
+<html>
 
-  <% } else  { %>
+<head>
+  <title>TinyApp</title>
+</head>
 
-    <h3>Hello
-      <%= username %>!
-    </h3>
-    <form method="POST" action="/urls/logout">
-        <input type="submit" value="Logout">
+<body>
+  <header>
+    <% include partials/_header %>
+  </header>
+  <h3>Login Page</h3>
+  <% if (!user_id) { %>
+    <form method="POST" action="/urls/login" style="margin:50px">
+      <div>
+        <label for="email">Enter E-mail: </label>
+        <input type="text" name="email" placeholder="ie: john@domain.com" onfocus="this.placeholder=''" onblur="this.placeholder='ie: john@domail.com'"
+          autocomplete="off" >
+      </div>
+      <br>
+      <div>
+        <label for="email">Enter password: </label>
+        <input type="password" name="password" autocomplete="off" >
+      </div>
+      <br>
+      <div>
+        <input type="submit" value="Login">
+      </div>
+
     </form>
-  <% } %>
+
+    <% } else  { %>
+
+      <h3>Hello
+        <%= user_id %>!
+      </h3>
+      <form method="POST" action="/urls/logout">
+        <input type="submit" value="Logout">
+      </form>
+      <% } %>
+</body>
+
+</html>

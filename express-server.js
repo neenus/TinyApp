@@ -49,12 +49,30 @@ function generateRandomString() {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   return text;
 }
+// function to loop over users database to check for duplicate emails if true returns user object
+function getUser(enteredEmail) {
+  for (let user in users ) {
+    if (users[user].email === enteredEmail) {
+      return users[user];
+    }
+  } 
+  return false;
+}
+// possibly not needed
+// Function to loop over Users database to check for password matches on login
+// function passwordValidation(enteredPassword) {
+//   for (let i in users) {
+//     if (users[i].password === enteredPassword) {
+//       return true;
+//     } else return false;
+//   }
+// }
 
 // App routes 
 // Get - home route
 app.get("/urls", (req, res) => {
   let templateVars = {
-    username: req.cookies.username,
+    user_id: req.cookies.id,
     urls: urlDatabase
   };
   res.render("urls_index", templateVars);
@@ -63,7 +81,7 @@ app.get("/urls", (req, res) => {
 // Get - new URL route - /url_new
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    username: req.cookies.username,
+    user_id: req.cookies.id,
     urls: urlDatabase
   };
   res.render("urls_new", templateVars);
@@ -73,7 +91,7 @@ app.get("/urls/new", (req, res) => {
 // Get - register route ===> registration form /urls/register
 app.get("/urls/register", (req, res) => {
   let templateVars = {
-    username: req.cookies.username,
+    user_id: req.cookies.id,
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id]
   };
@@ -82,14 +100,19 @@ app.get("/urls/register", (req, res) => {
 
 // Get - Login route - /urls_login
 app.get("/urls/login", (req, res) => {
+  let templateVars = {
+    user_id: req.cookies.id,
+    shortURL: req.params.id,
+    longURL: urlDatabase[req.params.id]
+  };
 
-  res.render("urls_login");
+  res.render("urls_login", templateVars);
 });
 
 // Get - Show individual URL route - /url_show
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
-    username: req.cookies.username,
+    user_id: req.cookies.id,
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id]
   };
@@ -99,7 +122,7 @@ app.get("/urls/:id", (req, res) => {
 // Post - delete url route
 app.post("/urls/:id/delete", (req, res) => {
   let templateVars = {
-    username: req.cookies.username,
+    user_id: req.cookies.id,
     urls: urlDatabase
   };
   // console.log(urlDatabase[req.params.id]);
@@ -130,39 +153,48 @@ app.post("/urls/shortURL", (req, res) => {
 
 // Post - Login route ===> user username cookie
 app.post("/urls/login", (req, res) => {
-  // console.log(req);
-  res.cookie("username", req.body.username);
-  res.redirect(req.headers.referer); // stay on same page
+  const {email, password} = req.body;
+  let thisuser = getUser(email);
+  // console.log(passwordCheck);
+
+  // if (email === "" || password === "") {
+  //   res.sendStatus(400);
+  if (!thisuser) {
+    res.sendStatus(403);
+  } else if (thisuser.password !== password) {
+    res.sendStatus(403);
+  } else {
+    res.cookie("user_id", thisuser.id);
+    res.redirect("/urls");
+  }
 });
 
 // Post - Logout route ===> clear username cookie
 app.post("/urls/logout", (req, res) => {
   // console.log(req);
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect(req.headers.referer); // stay on same page
 });
 
 // Post - registration route
 app.post("/urls/register", (req, res) => {
   const {email, password} = req.body;
+  let thisuser = getUser(email);
+  // console.log(emailcheck);
 // if statement to validate contents of the registration form
   if (email === "" || password === "") {
     res.sendStatus(400);
+  } else if (thisuser) {
+    res.sendStatus(400);
   } else {
     let id = generateRandomString();
-    const user = {
-    id: id,
-    email: email,
-    password: password
+    users[id] = {
+      id: id,
+      email: email,
+      password: password
     };
-    
-    users[id] = user;
-    res.cookie("user_id", id);
-    console.log(users);
     res.redirect("/urls");
-
   }
-
 });
 
 

@@ -1,0 +1,21 @@
+<h1>
+  <a href="/urls">Header of TinyApp</a>
+</h1>
+
+<% if (!user_id) { %>
+  <form method="POST" action="/urls/login">
+    <label for="user_id">Enter username: </label>
+    <input type="text" name="user_id" placeholder="ie: John Doe" onfocus="this.placeholder=''" onblur="this.placeholder='John Doe'"
+      autocomplete="off" required>
+    <input type="submit" value="Login">
+  </form>
+
+  <% } else  { %>
+
+    <h3>Hello
+      <%= user_id %>!
+    </h3>
+    <form method="POST" action="/urls/logout">
+        <input type="submit" value="Logout">
+    </form>
+  <% } %>
