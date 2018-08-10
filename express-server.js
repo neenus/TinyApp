@@ -80,6 +80,12 @@ app.get("/urls/register", (req, res) => {
   res.render("urls_register", templateVars);
 });
 
+// Get - Login route - /urls_login
+app.get("/urls/login", (req, res) => {
+
+  res.render("urls_login");
+});
+
 // Get - Show individual URL route - /url_show
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
