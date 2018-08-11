@@ -72,7 +72,7 @@ function getUser(enteredEmail) {
 // Get - home route
 app.get("/urls", (req, res) => {
   let templateVars = {
-    user_id: req.cookies.user_id,
+    user: users[req.cookies.user_id], //user: users[req.cookies.id]
     urls: urlDatabase
   };
   res.render("urls_index", templateVars);
@@ -81,7 +81,7 @@ app.get("/urls", (req, res) => {
 // Get - new URL route - /url_new
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    user_id: req.cookies.id,
+    user: req.cookies.id, 
     urls: urlDatabase
   };
   res.render("urls_new", templateVars);
@@ -91,7 +91,7 @@ app.get("/urls/new", (req, res) => {
 // Get - register route ===> registration form /urls/register
 app.get("/urls/register", (req, res) => {
   let templateVars = {
-    user_id: req.cookies.id,
+    user: req.cookies.id,
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id]
   };
@@ -101,10 +101,11 @@ app.get("/urls/register", (req, res) => {
 // Get - Login route - /urls_login
 app.get("/login", (req, res) => {
   let templateVars = {
-    user_id: req.cookies.id,
+    user: users[req.cookies.id],
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id]
   };
+  console.log(templateVars.user);
 
   res.render("urls_login", templateVars);
 });
@@ -112,7 +113,7 @@ app.get("/login", (req, res) => {
 // Get - Show individual URL route - /url_show
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
-    user_id: req.cookies.id,
+    user: req.cookies.id,
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id]
   };
@@ -122,7 +123,7 @@ app.get("/urls/:id", (req, res) => {
 // Post - delete url route
 app.post("/urls/:id/delete", (req, res) => {
   let templateVars = {
-    user_id: req.cookies.id,
+    user: req.cookies.id,
     urls: urlDatabase
   };
   // console.log(urlDatabase[req.params.id]);

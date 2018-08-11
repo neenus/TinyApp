@@ -2,7 +2,8 @@
   <a href="/urls">Header of TinyApp</a>
 </h1>
 
-<% if (!user_id) { %>
+<!-- if no user is logged in show register and login buttons  -->
+<% if (!user) { %>
 <!-- register button -->
 <button 
   name="register" 
@@ -19,11 +20,13 @@
 > Login 
 </button>
 
+<!-- if user is logged in show logout button -->
 <% } else  { %>
   <!-- Logout button -->
+  <h2>Hello <%= user["email"] %></h2>
   <form method="POST" action="/logout">
-  <input type="submit" value="Logout">
-</form>
+    <input type="submit" value="Logout">
+  </form>
   <% } %>
   
   <!-- 
