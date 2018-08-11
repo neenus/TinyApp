@@ -105,7 +105,6 @@ app.get("/login", (req, res) => {
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id]
   };
-  console.log(templateVars.user);
 
   res.render("urls_login", templateVars);
 });
@@ -126,7 +125,6 @@ app.post("/urls/:id/delete", (req, res) => {
     user: req.cookies.id,
     urls: urlDatabase
   };
-  // console.log(urlDatabase[req.params.id]);
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });
@@ -139,7 +137,6 @@ app.get("/urls.json", (req, res) => {
 
 // Post - Home route to add new url - '/urls/ 
 app.post("/urls", (req, res) => {
-  // console.log(req.body); // debug statement to see POST parameters
   let newid = generateRandomString();
   urlDatabase[newid] = req.body.longURL;
   res.redirect("/urls");
@@ -156,7 +153,6 @@ app.post("/urls/shortURL", (req, res) => {
 app.post("/login", (req, res) => {
   const {email, password} = req.body;
   let thisuser = getUser(email);
-  // console.log(passwordCheck);
 
   // if (email === "" || password === "") {
   //   res.sendStatus(400);
@@ -180,7 +176,6 @@ app.post("/logout", (req, res) => {
 app.post("/urls/register", (req, res) => {
   const {email, password} = req.body;
   let thisuser = getUser(email);
-  // console.log(emailcheck);
 // if statement to validate contents of the registration form
   if (email === "" || password === "") {
     res.sendStatus(400);
