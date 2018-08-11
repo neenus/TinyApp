@@ -81,17 +81,23 @@ app.get("/urls", (req, res) => {
 // Get - new URL route - /url_new
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    user: req.cookies.id, 
+    user: users[req.cookies.user_id], 
     urls: urlDatabase
   };
-  res.render("urls_new", templateVars);
+  if (req.cookies.user_id) {
+    res.render("urls_new", templateVars);
+
+  } else {
+    res.redirect("/login");
+  }
+  
   // res.redirect("/urls");
 });
 
 // Get - register route ===> registration form /urls/register
 app.get("/urls/register", (req, res) => {
   let templateVars = {
-    user: req.cookies.id,
+    user: users[req.cookies.user_id],
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id]
   };
@@ -101,7 +107,7 @@ app.get("/urls/register", (req, res) => {
 // Get - Login route - /urls_login
 app.get("/login", (req, res) => {
   let templateVars = {
-    user: users[req.cookies.id],
+    user: users[req.cookies.user_id],
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id]
   };
@@ -112,7 +118,7 @@ app.get("/login", (req, res) => {
 // Get - Show individual URL route - /url_show
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
-    user: req.cookies.id,
+    user: users[req.cookies.user_id],
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id]
   };
@@ -122,7 +128,7 @@ app.get("/urls/:id", (req, res) => {
 // Post - delete url route
 app.post("/urls/:id/delete", (req, res) => {
   let templateVars = {
-    user: req.cookies.id,
+    user: users[req.cookies.user_id],
     urls: urlDatabase
   };
   delete urlDatabase[req.params.id];
