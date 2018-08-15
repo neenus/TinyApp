@@ -1,16 +1,30 @@
 // dependencies
 const express = require('express');
-const cookieParser = require('cookie-parser');
+// const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const bodyParser = require("body-parser");
+const bcrypt = require('bcrypt'); 
 
 // Global const for the app
 const PORT = process.env.PORT || 8080; // default port 8080
 
+// Old structure of URL database - not being used after implementing URL ownership on line 15
+//  const urlDatabase = {
+//   "b2xVn2": "http://lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
 
-// URLs Databse 
+// URLs Databse - new structure
 const urlDatabase = {
-  "b2xVn2": "http://lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    userId: "userRandomID",
+    longURL: "http://lighthouselabs.ca"
+  }, 
+
+  "9sm5xK": {
+    userId: "userRandomID2",
+    longURL: "http://www.google.com"
+  }
 };
 
 // Users Database
@@ -18,12 +32,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
-    password: "asdf"
+    password: bcrypt.hashSync("asdf", 10)
   },
  "userRandomID2": {
     id: "userRandomID2", 
     email: "email@email.com", 
-    password: "asdf"
+    password: bcrypt.hashSync("asdf", 10)
   }
 };
 
@@ -31,13 +45,17 @@ const users = {
 const app = express();
 
 // Setup middleware
-app.use(cookieParser());
+app.use(cookieSession({
+  keys: ["hashedCookie"]
+}));
 app.use(bodyParser.urlencoded({
   extended: true
 }));
 
 // view enginge
 app.set('view engine', 'ejs');
+
+// Helper functions
 
 // function to generate a six charecter random string 
 // disclosure: this code snippet was copied from stackoverflow 
@@ -58,33 +76,36 @@ function getUser(enteredEmail) {
   } 
   return false;
 }
-// possibly not needed
-// Function to loop over Users database to check for password matches on login
-// function passwordValidation(enteredPassword) {
-//   for (let i in users) {
-//     if (users[i].password === enteredPassword) {
-//       return true;
-//     } else return false;
-//   }
-// }
+
+function urlsForUser(id) {
+  let thisUserUrls = {};
+  for (let url in urlDatabase) {
+    if (urlDatabase[url].userId === id) {
+      thisUserUrls[url] = urlDatabase[url]
+    }
+  }
+  return thisUserUrls;
+}
 
 // App routes 
 // Get - home route
 app.get("/urls", (req, res) => {
   let templateVars = {
-    user: users[req.cookies.user_id], //user: users[req.cookies.id]
-    urls: urlDatabase
+    user: users[req.session.user_id], //user: users[req.cookies.id]
+    urls: urlsForUser(req.session.user_id)
   };
+
   res.render("urls_index", templateVars);
 });
+
 
 // Get - new URL route - /url_new
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    user: users[req.cookies.user_id], 
+    user: users[req.session.user_id], 
     urls: urlDatabase
   };
-  if (req.cookies.user_id) {
+  if (req.session.user_id) {
     res.render("urls_new", templateVars);
 
   } else {
@@ -94,10 +115,11 @@ app.get("/urls/new", (req, res) => {
   // res.redirect("/urls");
 });
 
-// Get - register route ===> registration form /urls/register
-app.get("/urls/register", (req, res) => {
+// Get - register route ===> registration form /register
+app.get("/register", (req, res) => {
   let templateVars = {
-    user: users[req.cookies.user_id],
+    user : undefined,
+    // user: users[req.cookies.user_id],
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id]
   };
@@ -107,79 +129,16 @@ app.get("/urls/register", (req, res) => {
 // Get - Login route - /urls_login
 app.get("/login", (req, res) => {
   let templateVars = {
-    user: users[req.cookies.user_id],
+    user: users[req.session.user_id],
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id]
   };
-
+  
   res.render("urls_login", templateVars);
 });
 
-// Get - Show individual URL route - /url_show
-app.get("/urls/:id", (req, res) => {
-  let templateVars = {
-    user: users[req.cookies.user_id],
-    shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id]
-  };
-  res.render("urls_show", templateVars);
-});
-
-// Post - delete url route
-app.post("/urls/:id/delete", (req, res) => {
-  let templateVars = {
-    user: users[req.cookies.user_id],
-    urls: urlDatabase
-  };
-  delete urlDatabase[req.params.id];
-  res.redirect("/urls");
-});
-
-
-// Get - not sure why this is here
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-// Post - Home route to add new url - '/urls/ 
-app.post("/urls", (req, res) => {
-  let newid = generateRandomString();
-  urlDatabase[newid] = req.body.longURL;
-  res.redirect("/urls");
-});
-
-// Post - this will update the value entered in text box
-app.post("/urls/shortURL", (req, res) => {
-  urlDatabase[req.body.shortURL] = req.body.longURL;
-  // res.send("ok");
-  res.redirect("/urls");
-});
-
-// Post - Login route ===> user username cookie
-app.post("/login", (req, res) => {
-  const {email, password} = req.body;
-  let thisuser = getUser(email);
-
-  // if (email === "" || password === "") {
-  //   res.sendStatus(400);
-  if (!thisuser) {
-    res.sendStatus(403);
-  } else if (thisuser.password !== password) {
-    res.sendStatus(403);
-  } else {
-    res.cookie("user_id", thisuser.id);
-    res.redirect("/urls");
-  }
-});
-
-// Post - Logout route ===> clear username cookie
-app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
-  res.redirect("/urls");
-});
-
 // Post - registration route
-app.post("/urls/register", (req, res) => {
+app.post("/register", (req, res) => {
   const {email, password} = req.body;
   let thisuser = getUser(email);
 // if statement to validate contents of the registration form
@@ -192,12 +151,93 @@ app.post("/urls/register", (req, res) => {
     users[id] = {
       id: id,
       email: email,
-      password: password
+      password: bcrypt.hashSync(password, 10)
     };
-    res.cookie("user_id", id);
+    req.session.user_id = id;
     res.redirect("/urls");
   }
 });
+
+// Get - Show individual URL route - /url_show
+app.get("/urls/:id", (req, res) => {
+  let templateVars = {
+    user: users[req.session.user_id],
+    shortURL: req.params.id,
+    url: urlDatabase[req.params.id]
+  };
+  res.render("urls_show", templateVars);
+});
+
+// Get - Redirect short URLs
+app.get("/u/:shortURL", (req, res) => {
+  let url = urlDatabase[req.params.shortURL];
+  let longURL = url["longURL"];
+  res.redirect(longURL);
+});
+
+// Post - delete url route
+app.post("/urls/:id/delete", (req, res) => {
+  let currentUserID = req.session.user_id;
+  let url = urlDatabase[req.params.id];
+  if (currentUserID === url.userId) {
+    delete urlDatabase[req.params.id];
+    res.redirect("/urls");
+  } else {
+    res.sendStatus('403');
+  }
+
+});
+
+
+// Get - not sure why this is here
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
+
+// Post - Home route to add new url - '/urls/ 
+app.post("/urls/new", (req, res) => {
+  let newid = generateRandomString();
+  urlDatabase[newid] = {longURL:req.body.longURL, userId:req.session.user_id };
+  res.redirect("/urls");
+
+});
+
+// Post - this will update the value entered in text box
+app.post("/urls/:id", (req, res) => {
+  let currentUserID = req.session.user_id;
+  let url = urlDatabase[req.params.id];
+  if (currentUserID === url.userId) {
+    urlDatabase[req.params.id] = {longURL:req.body.longURL, userId:currentUserID};
+    res.redirect("/urls");
+  } else {
+    res.sendStatus('403');
+  }
+  
+});
+
+// Post - Login route ===> user username cookie
+app.post("/login", (req, res) => {
+  const {email, password} = req.body;
+  let thisuser = getUser(email);
+
+  // if (email === "" || password === "") {
+  //   res.sendStatus(400);
+  if (!thisuser) {
+    res.sendStatus(403);
+  } else if (bcrypt.compareSync(thisuser.password, password)) {
+    res.sendStatus(403);
+  } else {
+    req.session.user_id = thisuser.id;
+    res.redirect("/urls");
+  }
+});
+
+// Post - Logout route ===> clear username cookie
+app.post("/logout", (req, res) => {
+  req.session.user_id = null;
+  res.redirect("/urls");
+});
+
 
 
 // App listener

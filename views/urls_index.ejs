@@ -10,16 +10,24 @@
     <% include partials/_header %>
   </header>
   <ul>
-    <% for (var item in urls) { %>
+<% if (user && user.id) {
+  for (let item in urls) { %>
+
       <li>
         <form method="POST" action="/urls/<%= item %>/delete">
-          <a href="<%= urls[item] %>"> <%= item %> </a>:
-          <a href="<%= urls[item] %>"> <%= urls[item] %></a>
+          <a href="/u/<%= item %>"> <%= item %> </a>:
+          <%= urls[item]["longURL"] %>
+          <a href="/urls/<%=item%>">Edit</a>
           <input type="submit" value="Delete">
-          <button type="button" onclick="location.href='/urls/<%=item%>'" >Edit</button>
+          <!-- <button type="button" onclick="location.href='/urls/<%=item%>'" >Edit</button> -->
         </form>
       </li>
-      <% }; %>
+
+
+<%  }
+}else { %>
+  <h1>No user logged in ... nothing to show</h1>
+<% } %>
   </ul>
   <a href="/urls/new">shorten URL</a>
 </body>
