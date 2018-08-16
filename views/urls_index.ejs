@@ -5,7 +5,7 @@
   <title>TinyApp</title>
 </head>
 
-<body>
+  <body>
   <header>
     <% include partials/_header %>
   </header>
@@ -13,23 +13,21 @@
 <% if (user && user.id) {
   for (let item in urls) { %>
 
-      <li>
-        <form method="POST" action="/urls/<%= item %>/delete">
-          <a href="/u/<%= item %>"> <%= item %> </a>:
-          <%= urls[item]["longURL"] %>
-          <a href="/urls/<%=item%>">Edit</a>
-          <input type="submit" value="Delete">
-          <!-- <button type="button" onclick="location.href='/urls/<%=item%>'" >Edit</button> -->
-        </form>
-      </li>
-
+    <li>
+      <form method="POST" action="/urls/<%= item %>/delete">
+        <a href="/u/<%= item %>"> <%= item %> </a>:
+        <%= urls[item]["longURL"] %>
+        <input type="submit" value="Delete">
+        <button type="button" onclick="location.href='/urls/<%=item%>'" >Edit</button>
+      </form>
+    </li>
 
 <%  }
 }else { %>
   <h1>No user logged in ... nothing to show</h1>
 <% } %>
   </ul>
-  <a href="/urls/new">shorten URL</a>
-</body>
+  <a href="/urls/new">Create a New Short Link</a>
+  </body>
 
 </html>

@@ -1,6 +1,5 @@
 // dependencies
 const express = require('express');
-// const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
 const bodyParser = require("body-parser");
 const bcrypt = require('bcrypt'); 
@@ -8,11 +7,6 @@ const bcrypt = require('bcrypt');
 // Global const for the app
 const PORT = process.env.PORT || 8080; // default port 8080
 
-// Old structure of URL database - not being used after implementing URL ownership on line 15
-//  const urlDatabase = {
-//   "b2xVn2": "http://lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
 
 // URLs Databse - new structure
 const urlDatabase = {
@@ -55,10 +49,12 @@ app.use(bodyParser.urlencoded({
 // view enginge
 app.set('view engine', 'ejs');
 
-// Helper functions
+// ===========================================================================
+// ========================= Helper functions ================================
+// ===========================================================================
 
 // function to generate a six charecter random string 
-// disclosure: this code snippet was copied from stackoverflow 
+// disclosure: this code snippet was copied from a post on stackoverflow 
 function generateRandomString() {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -81,13 +77,16 @@ function urlsForUser(id) {
   let thisUserUrls = {};
   for (let url in urlDatabase) {
     if (urlDatabase[url].userId === id) {
-      thisUserUrls[url] = urlDatabase[url]
+      thisUserUrls[url] = urlDatabase[url];
     }
   }
   return thisUserUrls;
 }
 
-// App routes 
+// ===========================================================================
+// ============================ App Routes ===================================
+// ===========================================================================
+
 // Get - home route
 app.get("/urls", (req, res) => {
   let templateVars = {
@@ -111,19 +110,21 @@ app.get("/urls/new", (req, res) => {
   } else {
     res.redirect("/login");
   }
-  
-  // res.redirect("/urls");
+
 });
 
 // Get - register route ===> registration form /register
 app.get("/register", (req, res) => {
   let templateVars = {
     user : undefined,
-    // user: users[req.cookies.user_id],
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id]
   };
-  res.render("urls_register", templateVars);
+  if (!req.session.user_id) {
+    res.render("urls_register", templateVars);
+  } else {
+    res.redirect("/urls");
+  }
 });
 
 // Get - Login route - /urls_login
@@ -134,7 +135,11 @@ app.get("/login", (req, res) => {
     longURL: urlDatabase[req.params.id]
   };
   
-  res.render("urls_login", templateVars);
+  if (!req.session.user_id) {
+    res.render("urls_login", templateVars);
+  } else {
+    res.redirect("/urls");
+  }
 });
 
 // Post - registration route
@@ -165,13 +170,19 @@ app.get("/urls/:id", (req, res) => {
     shortURL: req.params.id,
     url: urlDatabase[req.params.id]
   };
-  res.render("urls_show", templateVars);
+
+  if(req.session.user_id === urlDatabase[req.params.id].userId) {
+    res.render("urls_show", templateVars);
+  } else {
+    res.send("Apologies... Seems like you are not the owner of this link ....");
+  }
+  
 });
 
 // Get - Redirect short URLs
 app.get("/u/:shortURL", (req, res) => {
   let url = urlDatabase[req.params.shortURL];
-  let longURL = url["longURL"];
+  let longURL = url.longURL;
   res.redirect(longURL);
 });
 
@@ -188,21 +199,15 @@ app.post("/urls/:id/delete", (req, res) => {
 
 });
 
-
-// Get - not sure why this is here
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
 // Post - Home route to add new url - '/urls/ 
 app.post("/urls/new", (req, res) => {
   let newid = generateRandomString();
   urlDatabase[newid] = {longURL:req.body.longURL, userId:req.session.user_id };
-  res.redirect("/urls");
+  res.redirect(`/urls/${newid}`);
 
 });
 
-// Post - this will update the value entered in text box
+// Post - update this will update the value entered in text box
 app.post("/urls/:id", (req, res) => {
   let currentUserID = req.session.user_id;
   let url = urlDatabase[req.params.id];
@@ -211,8 +216,7 @@ app.post("/urls/:id", (req, res) => {
     res.redirect("/urls");
   } else {
     res.sendStatus('403');
-  }
-  
+  } 
 });
 
 // Post - Login route ===> user username cookie
@@ -220,25 +224,22 @@ app.post("/login", (req, res) => {
   const {email, password} = req.body;
   let thisuser = getUser(email);
 
-  // if (email === "" || password === "") {
-  //   res.sendStatus(400);
   if (!thisuser) {
     res.sendStatus(403);
-  } else if (bcrypt.compareSync(thisuser.password, password)) {
-    res.sendStatus(403);
-  } else {
+  } else if (bcrypt.compareSync(password, thisuser.password)) {
     req.session.user_id = thisuser.id;
     res.redirect("/urls");
+  } else {
+    res.send("Sorry your username and password did not match our records");
   }
 });
 
 // Post - Logout route ===> clear username cookie
 app.post("/logout", (req, res) => {
-  req.session.user_id = null;
+  req.session = null;
   res.redirect("/urls");
 });
-
-
+// =============================================================
 
 // App listener
 app.listen(PORT, () => {
